@@ -1,10 +1,3 @@
-<!--
- * @Description: 我的订单页面组件
- * @Author: hai-27
- * @Date: 2020-02-20 17:21:54
- * @LastEditors: hai-27
- * @LastEditTime: 2020-02-27 13:36:27
- -->
 <template>
   <div class="order">
     <!-- 我的订单头部 -->
@@ -24,8 +17,8 @@
         <ul>
           <!-- 我的订单表头 -->
           <li class="order-info">
-            <div class="order-id">订单编号: {{item[0].orderId}}</div>
-            <div class="order-time">订单时间: {{item[0].orderTime | dateFormat}}</div>
+            <div class="order-id">订单编号: {{ item[0].orderId }}</div>
+            <div class="order-time">订单时间: {{ item[0].orderTime | dateFormat }}</div>
           </li>
           <li class="header">
             <div class="pro-img"></div>
@@ -33,6 +26,9 @@
             <div class="pro-price">单价</div>
             <div class="pro-num">数量</div>
             <div class="pro-total">小计</div>
+            <div class="pro-hasComment">已评价</div>
+            <div class="pro-rate">评价等级</div>
+            <div class="pro-comment">评价内容</div>
           </li>
           <!-- 我的订单表头END -->
 
@@ -40,30 +36,42 @@
           <li class="product-list" v-for="(product,i) in item" :key="i">
             <div class="pro-img">
               <router-link :to="{ path: '/goods/details', query: {productID:product.productId} }">
-                <img :src="$target + product.productPicture" />
+                <img :src="$target + product.productPicture"/>
               </router-link>
             </div>
             <div class="pro-name">
               <router-link
-                :to="{ path: '/goods/details', query: {productID:product.productId} }"
-              >{{product.productName}}</router-link>
+                  :to="{ path: '/goods/details', query: {productID:product.productId} }"
+              >{{ product.productName }}
+              </router-link>
             </div>
-            <div class="pro-price">{{product.productPrice}}元</div>
-            <div class="pro-num">{{product.productNum}}</div>
-            <div class="pro-total pro-total-in">{{product.productPrice*product.productNum}}元</div>
+            <div class="pro-price">{{ product.productPrice }}元</div>
+            <div class="pro-num">{{ product.productNum }}</div>
+            <div class="pro-total pro-total-in">{{ product.productPrice * product.productNum }}元</div>
+            <div class="pro-hasComment">{{ product.hasComment ? '是' : '否' }}</div>
+            <div class="pro-rate">
+              <p style="padding-top: 35px">
+                <el-rate v-if="product.hasComment" v-model="product.rate" disabled></el-rate>
+              </p>
+            </div>
+            <div class="pro-comment" v-if="product.hasComment">{{ product.comment }}</div>
+            <div class="pro-comment" v-else>
+              <el-button size="small" type="primary" @click="curProduct=product;comment={};dialogVisible=true">评价
+              </el-button>
+            </div>
           </li>
         </ul>
         <div class="order-bar">
           <div class="order-bar-left">
             <span class="order-total">
               共
-              <span class="order-total-num">{{total[index].totalNum}}</span> 件商品
+              <span class="order-total-num">{{ total[index].totalNum }}</span> 件商品
             </span>
           </div>
           <div class="order-bar-right">
             <span>
               <span class="total-price-title">合计：</span>
-              <span class="total-price">{{total[index].totalPrice}}元</span>
+              <span class="total-price">{{ total[index].totalPrice }}元</span>
             </span>
           </div>
           <!-- 订单列表END -->
@@ -81,6 +89,32 @@
       </div>
     </div>
     <!-- 订单为空的时候显示的内容END -->
+
+    <el-dialog
+        title="评价"
+        :visible.sync="dialogVisible"
+        width="30%">
+      <el-form ref="postForm" :model="comment" :rules="rules" label-width="100px">
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="等级:" prop="rate">
+              <el-rate v-model="comment.rate"/>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="评价内容:" prop="content">
+              <el-input type="textarea" :rows="2" v-model="comment.content"/>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitComment">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -88,27 +122,22 @@ export default {
   data() {
     return {
       orders: [], // 订单列表
-      total: [] // 每个订单的商品数量及总价列表
+      total: [], // 每个订单的商品数量及总价列表
+      dialogVisible: false,
+      curProduct: {},
+      comment: {},
+      rules: {
+        rate: [{required: true, message: '必填', trigger: 'change'}],
+        content: [{required: true, message: '必填', trigger: 'change'}]
+      }
     };
   },
   activated() {
-    // 获取订单数据
-    this.$axios
-      .get("/api/order")
-      .then(res => {
-        if (res.data.code === "001") {
-          this.orders = res.data.data;
-        } else {
-          this.notifyError(res.data.msg);
-        }
-      })
-      .catch(err => {
-        return Promise.reject(err);
-      });
+    this.loadData()
   },
   watch: {
     // 通过订单信息，计算出每个订单的商品数量及总价
-    orders: function(val) {
+    orders: function (val) {
       let total = [];
       for (let i = 0; i < val.length; i++) {
         const element = val[i];
@@ -120,9 +149,49 @@ export default {
           totalNum += temp.productNum;
           totalPrice += temp.productPrice * temp.productNum;
         }
-        total.push({ totalNum, totalPrice });
+        total.push({totalNum, totalPrice});
       }
       this.total = total;
+    }
+  },
+  methods: {
+    loadData() {
+      // 获取订单数据
+      this.$axios
+          .get("/api/order")
+          .then(res => {
+            if (res.data.code === "001") {
+              this.orders = res.data.data;
+            } else {
+              this.notifyError(res.data.msg);
+            }
+          })
+          .catch(err => {
+            return Promise.reject(err);
+          });
+    },
+    submitComment() {
+      let comment = {
+        orderId: this.curProduct.orderId,
+        userId: this.curProduct.userId,
+        productId: this.curProduct.productId,
+        rate: this.comment.rate,
+        content: this.comment.content
+      }
+      this.$axios
+          .post("/api/productComment",comment)
+          .then(res => {
+            if (res.data.code === "001") {
+              this.loadData()
+            } else {
+              this.notifyError(res.data.msg);
+            }
+            this.dialogVisible=false
+          })
+          .catch(err => {
+            this.dialogVisible=false
+            return Promise.reject(err);
+          });
     }
   }
 };
@@ -132,6 +201,7 @@ export default {
   background-color: #f5f5f5;
   padding-bottom: 20px;
 }
+
 /* 我的订单头部CSS */
 .order .order-header {
   height: 64px;
@@ -139,10 +209,12 @@ export default {
   background-color: #fff;
   margin-bottom: 20px;
 }
+
 .order .order-header .order-header-content {
   width: 1225px;
   margin: 0 auto;
 }
+
 .order .order-header p {
   font-size: 28px;
   line-height: 58px;
@@ -150,6 +222,7 @@ export default {
   font-weight: normal;
   color: #424242;
 }
+
 /* 我的订单头部CSS END */
 .order .content {
   width: 1225px;
@@ -163,6 +236,7 @@ export default {
   color: #424242;
   line-height: 85px;
 }
+
 /* 我的订单表头CSS */
 .order .content ul .order-info {
   height: 60px;
@@ -171,10 +245,12 @@ export default {
   color: #424242;
   border-bottom: 1px solid #ff6700;
 }
+
 .order .content ul .order-info .order-id {
   float: left;
   color: #ff6700;
 }
+
 .order .content ul .order-info .order-time {
   float: right;
 }
@@ -184,6 +260,7 @@ export default {
   padding-right: 26px;
   color: #424242;
 }
+
 /* 我的订单表头CSS END */
 
 /* 订单列表CSS */
@@ -192,45 +269,71 @@ export default {
   padding: 15px 26px 15px 0;
   border-top: 1px solid #e0e0e0;
 }
+
 .order .content ul .pro-img {
   float: left;
   height: 85px;
   width: 120px;
   padding-left: 80px;
 }
+
 .order .content ul .pro-img img {
   height: 80px;
   width: 80px;
 }
+
 .order .content ul .pro-name {
   float: left;
-  width: 380px;
+  width: 200px;
 }
+
 .order .content ul .pro-name a {
   color: #424242;
 }
+
 .order .content ul .pro-name a:hover {
   color: #ff6700;
 }
+
 .order .content ul .pro-price {
   float: left;
-  width: 160px;
+  width: 100px;
   padding-right: 18px;
   text-align: center;
 }
+
 .order .content ul .pro-num {
   float: left;
-  width: 190px;
+  width: 100px;
   text-align: center;
 }
+
 .order .content ul .pro-total {
   float: left;
-  width: 160px;
-  padding-right: 81px;
+  width: 100px;
+  padding-right: 18px;
   text-align: right;
 }
+
 .order .content ul .pro-total-in {
   color: #ff6700;
+}
+
+.order .content ul .pro-hasComment {
+  float: left;
+  width: 100px;
+  padding-right: 80px;
+  text-align: right;
+}
+
+.order .content ul .pro-rate {
+  float: left;
+  width: 130px;
+}
+
+.order .content ul .pro-comment {
+  float: left;
+  width: 150px;
 }
 
 .order .order-bar {
@@ -241,26 +344,33 @@ export default {
   line-height: 50px;
   background-color: #fff;
 }
+
 .order .order-bar .order-bar-left {
   float: left;
 }
+
 .order .order-bar .order-bar-left .order-total {
   color: #757575;
 }
+
 .order .order-bar .order-bar-left .order-total-num {
   color: #ff6700;
 }
+
 .order .order-bar .order-bar-right {
   float: right;
 }
+
 .order .order-bar .order-bar-right .total-price-title {
   color: #ff6700;
   font-size: 14px;
 }
+
 .order .order-bar .order-bar-right .total-price {
   color: #ff6700;
   font-size: 30px;
 }
+
 /* 订单列表CSS END */
 
 /* 订单为空的时候显示的内容CSS */
@@ -268,6 +378,7 @@ export default {
   width: 1225px;
   margin: 0 auto;
 }
+
 .order .order-empty .empty {
   height: 300px;
   padding: 0 0 130px 558px;
@@ -276,13 +387,16 @@ export default {
   color: #b0b0b0;
   overflow: hidden;
 }
+
 .order .order-empty .empty h2 {
   margin: 70px 0 15px;
   font-size: 36px;
 }
+
 .order .order-empty .empty p {
   margin: 0 0 20px;
   font-size: 20px;
 }
+
 /* 订单为空的时候显示的内容CSS END */
 </style>

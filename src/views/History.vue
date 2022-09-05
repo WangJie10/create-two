@@ -4,7 +4,7 @@
     <div class="collect-header">
       <div class="collect-title">
         <i class="el-icon-collection-tag" style="color: #ff6700;"></i>
-        我的收藏
+        历史足迹
       </div>
     </div>
     <div class="content">
@@ -32,7 +32,7 @@ export default {
   activated() {
     // 获取收藏数据
     this.$axios
-      .get("/api/collect/user/" + this.$store.getters.getUser.userId)
+      .get("/api/history/user/" + this.$store.getters.getUser.userId)
       .then(res => {
         if (res.data.code === "001") {
           this.collectList = res.data.data;

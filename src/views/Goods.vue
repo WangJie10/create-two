@@ -1,10 +1,3 @@
-<!--
- * @Description: 全部商品页面组件(包括全部商品,商品分类,商品搜索)
- * @Author: hai-27
- * @Date: 2020-02-07 16:23:00
- * @LastEditors: hai-27
- * @LastEditTime: 2020-03-08 12:11:13
- -->
 <template>
   <div class="goods" id="goods" name="goods">
     <!-- 面包屑 -->
@@ -38,7 +31,7 @@
     <!-- 主要内容区 -->
     <div class="main">
       <div class="list">
-        <MyList :list="product" v-if="product.length>0"></MyList>
+        <MyList :list="product" v-if="product&&product.length>0"></MyList>
         <div v-else class="none-product">抱歉没有找到相关的商品，请看看其他的商品</div>
       </div>
       <!-- 分页 -->
@@ -183,23 +176,6 @@ export default {
     // 向后端请求全部商品或分类商品数据
     getData() {
       // 如果分类列表为空则请求全部商品数据，否则请求分类商品数据
-      // const api =
-      //   this.categoryID.length == 0
-      //     ? "/api/product"
-      //     : "/api/product/category";
-      // this.$axios
-      //   .post(api, {
-      //     categoryID: this.categoryID,
-      //     currentPage: this.currentPage,
-      //     pageSize: this.pageSize
-      //   })
-      //   .then(res => {
-      //     this.product = res.data.Product;
-      //     this.total = res.data.total;
-      //   })
-      //   .catch(err => {
-      //     return Promise.reject(err);
-      //   });
       let api = "/api/product/page/" + this.currentPage + "/" + this.pageSize;
       if (this.categoryID.length == 0) { // 分页获取全部商品
         api += "/0"
@@ -219,13 +195,9 @@ export default {
     // 通过搜索条件向后端请求商品数据
     getProductBySearch() {
       this.$axios
-        .post("/api/product/getProductBySearch", {
-          search: this.search,
-          currentPage: this.currentPage,
-          pageSize: this.pageSize
-        })
+        .get("/api/product/getProductBySearch/"+ this.currentPage + "/" + this.pageSize+"?k="+this.search)
         .then(res => {
-          this.product = res.data.Product;
+          this.product = res.data.data;
           this.total = res.data.total;
         })
         .catch(err => {

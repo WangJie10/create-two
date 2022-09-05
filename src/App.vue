@@ -1,10 +1,3 @@
-<!--
- * @Description: 项目根组件
- * @Author: hai-27
- * @Date: 2020-02-07 16:23:00
- * @LastEditors: hai-27
- * @LastEditTime: 2020-03-12 19:30:36
- -->
 <template>
   <div id="app" name="app">
     <el-container>
@@ -29,10 +22,16 @@
               </el-popover>
             </li>
             <li>
+              <router-link to="/cms">{{this.$store.getters.getUser.username!=null&&this.$store.getters.getUser.username==='admin'?'后台管理':'个人中心'}}</router-link>
+            </li>
+            <li>
               <router-link to="/order">我的订单</router-link>
             </li>
             <li>
               <router-link to="/collect">我的收藏</router-link>
+            </li>
+            <li>
+              <router-link to="/history">历史足迹</router-link>
             </li>
             <li :class="getNum > 0 ? 'shopCart-full' : 'shopCart'">
               <router-link to="/shoppingCart">
@@ -98,11 +97,6 @@
               </p>
             </div>
           </div>
-          <div class="github">
-            <a href="https://github.com/ZeroWdd" target="_blank">
-              <div class="github-but"></div>
-            </a>
-          </div>
           <div class="mod_help">
             <p>
               <router-link to="/">首页</router-link>
@@ -111,9 +105,8 @@
               <span>|</span>
               <router-link to="/seckill">秒杀</router-link>
               <span>|</span>
-              <!-- <router-link to="/about">关于我们</router-link> -->
             </p>
-            <p class="coty">商城版权所有 &copy; 2012-2021</p>
+            <p class="coty">商城版权所有 &copy; 2021-2022</p>
           </div>
         </div>
       </el-footer>
@@ -156,18 +149,6 @@ export default {
       this.setUser(user);
     }
 
-    // window.setTimeout(() => {
-    //   this.$message({
-    //     duration: 0,
-    //     showClose: true,
-    //     message: `
-    //     <p>如果觉得这个项目还不错，</p>
-    //     <p style="padding:10px 0">您可以给项目源代码仓库点Star支持一下，谢谢！</p>
-    //     <p><a href="https://github.com/hai-27/vue-store" target="_blank">Github传送门</a></p>`,
-    //     dangerouslyUseHTMLString: true,
-    //     type: "success"
-    //   });
-    // }, 1000 * 60);
   },
   computed: {
     ...mapGetters(["getUser", "getNum"])
@@ -251,6 +232,7 @@ export default {
   border: 0;
   list-style: none;
 }
+
 #app .el-header {
   padding: 0;
 }

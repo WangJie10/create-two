@@ -1,17 +1,10 @@
-<!--
- * @Description: 首页组件
- * @Author: hai-27
- * @Date: 2020-02-07 16:23:00
- * @LastEditors: hai-27
- * @LastEditTime: 2020-02-27 13:36:12
- -->
 <template>
   <div class="home" id="home" name="home">
     <!-- 轮播图 -->
     <div class="block">
       <el-carousel height="460px">
         <el-carousel-item v-for="item in carousel" :key="item.carouselId">
-          <img style="height:460px;" :src="item.imgPath" :alt="item.describes" />
+          <img style="height:460px;" :src="$target +item.imgPath" :alt="item.describes" />
         </el-carousel-item>
       </el-carousel>
     </div>
@@ -22,12 +15,12 @@
         <!-- 手机商品展示区域 -->
         <div class="phone">
           <div class="box-hd">
-            <div class="title">手机特卖</div>
+            <div class="title">特卖产品</div>
           </div>
           <div class="box-bd">
             <div class="promo-list">
               <router-link to>
-                <img :src="$target +'public/imgs/phone/phone.png'" />
+                <img :src="$target +'file/shoujitemai.jpg'" />
               </router-link>
             </div>
             <div class="list">
@@ -40,16 +33,16 @@
         <!-- 电视商品展示区域 -->
         <div class="phone">
           <div class="box-hd">
-            <div class="title">电视影音</div>
+            <div class="title">特色产品</div>
           </div>
           <div class="box-bd">
             <div class="promo-list">
               <router-link to>
-                <img :src="$target +'public/imgs/phone/phone.png'" />
+                <img :src="$target +'/file/zhinengchuandai.jpg'" />
               </router-link>
             </div>
             <div class="list">
-              <MyList :list="miTvList" :isMore="true"></MyList>
+              <MyList :list="miChuanDaiList" :isMore="true"></MyList>
             </div>
           </div>
         </div>
@@ -58,23 +51,23 @@
         <!-- 配件商品展示区域 -->
         <div class="accessory" id="promo-menu">
           <div class="box-hd">
-            <div class="title">热门商品</div>
-            <div class="more" id="more">
-              <MyMenu :val="3" @fromChild="getChildMsg2">
-                <span slot="1">热门</span>
-                <span slot="2">保护套</span>
-                <span slot="3">充电器</span>
-              </MyMenu>
-            </div>
+            <div class="title">热卖</div>
+<!--            <div class="more" id="more">-->
+<!--              <MyMenu :val="3" @fromChild="getChildMsg2">-->
+<!--                <span slot="1">热门</span>-->
+<!--                <span slot="2">保护套</span>-->
+<!--                <span slot="3">充电器</span>-->
+<!--              </MyMenu>-->
+<!--            </div>-->
           </div>
           <div class="box-bd">
             <div class="promo-list">
               <ul>
                 <li>
-                  <img :src="$target +'public/imgs/accessory/accessory-promo1.png'" alt />
+                  <img :src="$target +'file/jiadian1.jpg'" alt />
                 </li>
                 <li>
-                  <img :src="$target +'public/imgs/accessory/accessory-promo2.png'" alt />
+                  <img :src="$target +'file/jiadian2.jpg'" alt />
                 </li>
               </ul>
             </div>
@@ -94,9 +87,7 @@ export default {
     return {
       carousel: "", // 轮播图数据
       phoneList: "", // 手机商品列表
-      miTvList: "", // 小米电视商品列表
-      // applianceList: "", // 家电商品列表
-      // applianceHotList: "", //热门家电商品列表
+      miChuanDaiList: "", // 小米电视商品列表
       accessoryList: "", //配件商品列表
       accessoryHotList: "", //热门配件商品列表
       protectingShellList: "", // 保护套商品列表
@@ -106,24 +97,6 @@ export default {
     };
   },
   watch: {
-    // // 家电当前选中的商品分类，响应不同的商品数据
-    // applianceActive: function(val) {
-    //   // 页面初始化的时候把applianceHotList(热门家电商品列表)直接赋值给applianceList(家电商品列表)
-    //   // 所以在切换商品列表时判断applianceHotList是否为空,为空则是第一次切换,把applianceList赋值给applianceHotList
-    //   if (this.applianceHotList == "") {
-    //     this.applianceHotList = this.applianceList;
-    //   }
-    //   if (val == 1) {
-    //     // 1为热门商品
-    //     this.applianceList = this.applianceHotList;
-    //     return;
-    //   }
-    //   if (val == 2) {
-    //     // 2为电视商品
-    //     this.applianceList = this.miTvList;
-    //     return;
-    //   }
-    // },
     accessoryActive: function(val) {
       // 页面初始化的时候把accessoryHotList(热门配件商品列表)直接赋值给accessoryList(配件商品列表)
       // 所以在切换商品列表时判断accessoryHotList是否为空,为空则是第一次切换,把accessoryList赋值给accessoryHotList
@@ -159,21 +132,14 @@ export default {
       });
     // 获取各类商品数据
     this.getPromo(1, "phoneList");
-    this.getPromo(2, "miTvList");
+    this.getPromo(2, "miChuanDaiList");
     this.getPromo(5, "protectingShellList");
     this.getPromo(7, "chargerList");
-    // this.getHot(
-    //   "applianceList"
-    // );
     this.getHot(
       "accessoryList"
     );
   },
   methods: {
-    // 获取家电模块子组件传过来的数据
-    // getChildMsg(val) {
-    //   this.applianceActive = val;
-    // },
     // 获取配件模块子组件传过来的数据
     getChildMsg2(val) {
       this.accessoryActive = val;

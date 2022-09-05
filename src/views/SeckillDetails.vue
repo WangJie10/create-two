@@ -1,10 +1,3 @@
-<!--
- * @Description: 商品详情页面组件
- * @Author: hai-27
- * @Date: 2020-02-16 20:20:26
- * @LastEditors: hai-27
- * @LastEditTime: 2020-03-07 21:59:26
- -->
 <template>
   <div id="details">
     <!-- 头部 -->
@@ -32,17 +25,8 @@
     <div class="main">
       <!-- 左侧商品轮播图 -->
       <div class="block">
-        <el-carousel height="560px" v-if="productPicture.length>1">
-          <el-carousel-item v-for="item in productPicture" :key="item.id">
-            <img style="height:560px;" :src="$target + item.productPicture" :alt="item.intro" />
-          </el-carousel-item>
-        </el-carousel>
-        <div v-if="productPicture.length==1">
-          <img
-            style="height:560px;"
-            :src="$target + productPicture[0].productPicture"
-            :alt="productPicture[0].intro"
-          />
+        <div>
+          <img style="height:560px;" :src="$target + productDetails.productPicture" />
         </div>
       </div>
       <!-- 左侧商品轮播图END -->
@@ -111,7 +95,6 @@ export default {
       productID: "", // 商品id
       seckillID: "", // 商品id
       productDetails: "", // 商品详细信息
-      productPicture: "", // 商品图片
       seckillState:0, // 秒杀状态 0 未开始，1进行中，2结束
       remainSeconds:0, // 秒杀倒计时
       testTime:0
@@ -128,11 +111,6 @@ export default {
     // console.log(new Date().getTime());
   },
   watch: {
-    // 监听商品id的变化，请求后端获取商品数据
-    productID: function(val) {
-      // this.getDetails(val);
-      this.getDetailsPicture(val);
-    },
     seckillID: function(val) {
         this.getDetails(val);
     },
@@ -171,18 +149,6 @@ export default {
           return Promise.reject(err);
         });
     
-    },
-    // 获取商品图片
-    getDetailsPicture(val) {
-      this.$axios
-        .get("/api/productPicture/product/" + val)
-        .then(res => {
-          this.productPicture = res.data.data;
-
-        })
-        .catch(err => {
-          return Promise.reject(err);
-        });
     },
     countDown() {
         let _this=this;

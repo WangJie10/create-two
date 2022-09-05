@@ -1,10 +1,3 @@
-<!--
- * @Description: 登录组件
- * @Author: hai-27
- * @Date: 2020-02-19 20:55:17
- * @LastEditors: hai-27
- * @LastEditTime: 2020-03-01 15:34:08
- -->
 <template>
   <div id="myLogin">
     <el-dialog title="登录" width="300px" center :visible.sync="isLogin">
@@ -105,8 +98,8 @@ export default {
                 // 隐藏登录组件
                 this.isLogin = false;
                 // 登录信息存到本地
-                // let user = JSON.stringify(res.data.data);
-                // localStorage.setItem("user", user);
+                let user = JSON.stringify(res.data.data);
+                localStorage.setItem("user", user);
                 // 登录信息存到vuex
                 this.setUser(res.data.data);
                 // 弹出通知框提示登录成功信息
